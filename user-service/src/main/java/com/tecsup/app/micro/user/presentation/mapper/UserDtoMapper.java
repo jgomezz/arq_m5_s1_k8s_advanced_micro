@@ -1,10 +1,9 @@
-package com.tecsup.app.micro.user.infrastructure.web.mapper;
-
+package com.tecsup.app.micro.user.presentation.mapper;
 
 import com.tecsup.app.micro.user.domain.model.User;
-import com.tecsup.app.micro.user.infrastructure.web.dto.CreateUserRequest;
-import com.tecsup.app.micro.user.infrastructure.web.dto.UpdateUserRequest;
-import com.tecsup.app.micro.user.infrastructure.web.dto.UserResponse;
+import com.tecsup.app.micro.user.presentation.dto.CreateUserRequest;
+import com.tecsup.app.micro.user.presentation.dto.UpdateUserRequest;
+import com.tecsup.app.micro.user.presentation.dto.UserResponse;
 import org.mapstruct.Mapper;
 
 import java.util.List;

@@ -20,7 +20,7 @@ spring:
   # Estas variables vienen de ConfigMap y Secrets de Kubernetes
   datasource:
     url: jdbc:postgresql://localhost:5434/userdb
-    username: ${DB_USERNAME:postgres}
+    username:  ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
 
@@ -73,3 +73,14 @@ logging:
   level:
     com.tecsup.app.micro.user: ${LOG_LEVEL:INFO}
     org.hibernate.SQL: ${SQL_LOG_LEVEL:WARN}
+
+
+
+# ============================================
+# JWT CONFIGURATION (Sesion 2)
+# ============================================
+jwt:
+  secret: ${JWT_SECRET:m1S3cr3tK3yJWT_T3csup2025!@#SecureToken}
+  expiration: 3600000  # 1 hora en milisegundos
+
+

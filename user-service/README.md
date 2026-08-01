@@ -106,7 +106,7 @@ mvn clean compile
 docker-compose -f ../docker-compose.yml up -d
 
 # Ver logs
-docker logs postgres-user-dev
+docker logs postgres-user
 
 ```
 
@@ -338,3 +338,4 @@ kubectl logs -f <POD_NAME> -n user-service
 
 
 ```
+

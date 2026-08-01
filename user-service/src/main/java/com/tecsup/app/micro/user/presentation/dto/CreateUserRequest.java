@@ -1,4 +1,4 @@
-package com.tecsup.app.micro.user.infrastructure.web.dto;
+package com.tecsup.app.micro.user.presentation.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -9,13 +9,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * DTO para actualizar un usuario
+ * DTO para crear un usuario
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateUserRequest {
+public class CreateUserRequest {
     
     @NotBlank(message = "Name is required")
     @Size(max = 100, message = "Name must not exceed 100 characters")

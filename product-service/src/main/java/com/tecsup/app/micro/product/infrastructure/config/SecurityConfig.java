@@ -37,6 +37,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    // =============================================
+    // Descomentar para Sesión 2 (JWT)
+    // =============================================
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -51,7 +57,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/products").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/products/available").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/products/health").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/products/{id}").permitAll()
+//                        .requestMatchers(HttpMethod.GET, "/api/products/{id}").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/products/{id}").hasRole("ADMIN") //.permitAll() // CAMBIO
+
                         .requestMatchers("/actuator/health/**").permitAll()
 
                         // Solo ADMIN puede crear, actualizar, eliminar productos
@@ -63,6 +71,11 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
 
+
+                // =============================================
+                // Sesión 2: JWT (descomentar)
+                // =============================================
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 
                 // Manejo de errores
                 .exceptionHandling(ex -> ex
@@ -89,7 +102,6 @@ public class SecurityConfig {
                                     """);
                         })
                 );
-
         return http.build();
     }
 }

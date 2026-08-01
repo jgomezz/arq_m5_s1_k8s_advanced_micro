@@ -1,12 +1,11 @@
-package com.tecsup.app.micro.user.infrastructure.web.controller;
+package com.tecsup.app.micro.user.presentation.controller;
 
 import com.tecsup.app.micro.user.application.service.UserApplicationService;
 import com.tecsup.app.micro.user.domain.model.User;
-
-import com.tecsup.app.micro.user.infrastructure.web.dto.CreateUserRequest;
-import com.tecsup.app.micro.user.infrastructure.web.dto.UpdateUserRequest;
-import com.tecsup.app.micro.user.infrastructure.web.dto.UserResponse;
-import com.tecsup.app.micro.user.infrastructure.web.mapper.UserDtoMapper;
+import com.tecsup.app.micro.user.presentation.dto.CreateUserRequest;
+import com.tecsup.app.micro.user.presentation.dto.UpdateUserRequest;
+import com.tecsup.app.micro.user.presentation.dto.UserResponse;
+import com.tecsup.app.micro.user.presentation.mapper.UserDtoMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,5 +1,6 @@
 package com.tecsup.app.micro.user.infrastructure.config;
 
+import com.tecsup.app.micro.user.infrastructure.security.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,7 +14,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import com.tecsup.app.micro.user.infrastructure.security.CustomUserDetailsService;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
  * Configuración de Spring Security para user-service
@@ -37,6 +38,11 @@ import com.tecsup.app.micro.user.infrastructure.security.CustomUserDetailsServic
 public class SecurityConfig {
 
     private final CustomUserDetailsService customUserDetailsService;
+
+    // =============================================
+    // Descomentar para Sesión 2 (JWT)
+    // =============================================
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
     public SecurityFilterChain userServiceSecurity(HttpSecurity http) throws Exception {
@@ -67,23 +73,40 @@ public class SecurityConfig {
                 // =============================================
                 // Sesión 1: HTTP Basic (comentar en Sesión 2)
                 // =============================================
-                .httpBasic(basic -> basic
+//                .httpBasic(basic -> basic
+//                        .authenticationEntryPoint((request, response, authException) -> {
+//                            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+//                            response.setContentType("application/json");
+//                            response.getWriter().write(
+//                                    """
+//                                            {
+//                                                "error"  : "No autenticado",
+//                                                "status" : 401,
+//                                                "message": "Debes autenticarte para acceder a este recurso"
+//                                             }
+//                                       """);
+//                        })
+//                )
+
+                // =============================================
+                // Sesión 2: JWT (descomentar y comentar httpBasic)
+                // =============================================
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+
+                // Manejo de errores de autorización (403)
+                .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setStatus(HttpStatus.UNAUTHORIZED.value());
                             response.setContentType("application/json");
                             response.getWriter().write(
                                     """
-                                            {
-                                                "error"  : "No autenticado", 
-                                                "status" : 401,
-                                                "message": "Debes autenticarte para acceder a este recurso"
-                                             }
+                                        {
+                                            "error": "No autenticado", 
+                                            "status": 401,
+                                            "message": "Debes autenticarte para acceder a este recurso"
+                                        }
                                        """);
                         })
-                )
-
-                // Manejo de errores de autorización (403)
-                .exceptionHandling(ex -> ex
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
                             response.setStatus(HttpStatus.FORBIDDEN.value());
                             response.setContentType("application/json");

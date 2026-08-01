@@ -1,5 +1,4 @@
-package com.tecsup.app.micro.user.infrastructure.web.controller;
-
+package com.tecsup.app.micro.user.presentation.controller;
 
 import com.tecsup.app.micro.user.domain.exception.DuplicateEmailException;
 import com.tecsup.app.micro.user.domain.exception.InvalidUserDataException;
