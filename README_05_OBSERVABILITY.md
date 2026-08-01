@@ -27,3 +27,22 @@
 └──────────────────────────────────────────────────────────────────┘
 
 ```
+## 1.- Estructura de la solución de Observabilidad
+
+```
+
+```
+
+## 2.- Modificar microservicios : product-service y user-service
+
+```xml
+        <!-- ============================================ -->
+        <!-- NUEVO - Módulo 5 Sesión 1: Observabilidad    -->
+        <!-- ============================================ -->
+
+        <!-- Micrometer → Prometheus (métricas) -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
+```

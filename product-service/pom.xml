@@ -88,7 +88,17 @@
             <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
 
-        
+        <!-- ============================================ -->
+        <!-- NUEVO - Módulo 5 Sesión 1: Observabilidad    -->
+        <!-- ============================================ -->
+
+        <!-- Micrometer → Prometheus (métricas) -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
+
+
         <!-- PostgreSQL Driver -->
         <dependency>
             <groupId>org.postgresql</groupId>
