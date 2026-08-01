@@ -1,0 +1,12 @@
+# ============================================
+# NAMESPACE
+# ============================================
+# Agrupa recursos relacionados
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: product-service
+  labels:
+    name: product-service
+    environment: local

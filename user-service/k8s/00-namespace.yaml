@@ -1,0 +1,12 @@
+# ============================================
+# NAMESPACE
+# ============================================
+# Agrupa recursos relacionados
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: user-service
+  labels:
+    name: user-service
+    environment: local

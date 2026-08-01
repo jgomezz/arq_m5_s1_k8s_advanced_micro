@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arquitectura Microservicios en AWS EKS</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f0f2f5;
+    --surface: #ffffff;
+    --text: #1a1d2e;
+    --text-mid: #4a4f6a;
+    --text-dim: #7b809a;
+    --aws-orange: #d4820a;
+    --aws-bg: #fef8f0;
+    --aws-border: #e8c48a;
+    --vpc-green: #1a7a52;
+    --vpc-bg: #f0faf5;
+    --vpc-border: #8ecdb0;
+    --eks-blue: #1558a8;
+    --eks-bg: #f0f5fc;
+    --eks-border: #8bb5e0;
+    --alb-purple: #6d35c4;
+    --alb-bg: #f5f0fc;
+    --alb-border: #c2a6e8;
+    --rds-indigo: #3540a8;
+    --rds-bg: #f0f1fc;
+    --rds-border: #a0a6e0;
+    --ecr-teal: #0a7d6a;
+    --ecr-bg: #effaf7;
+    --ecr-border: #8ad4c2;
+    --svc-user: #0d7244;
+    --svc-user-bg: #edfaf3;
+    --svc-user-border: #92d4ae;
+    --svc-product: #b42d6a;
+    --svc-product-bg: #fdf0f6;
+    --svc-product-border: #e4a0c2;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+  }
+
+  .page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 24px 60px;
+  }
+
+  /* ===== HEADER ===== */
+  .header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .header .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--aws-bg);
+    border: 1px solid var(--aws-border);
+    color: var(--aws-orange);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+  }
+
+  .header h1 {
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+
+  .header h1 span { color: var(--aws-orange); }
+
+  .header p { color: var(--text-dim); font-size: 14px; }
+
+  /* ===== ARROW ===== */
+  .arrow-down {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 6px 0;
+  }
+
+  .arrow-down .shaft {
+    width: 2px;
+    height: 24px;
+    background: var(--text-dim);
+    opacity: 0.4;
+  }
+
+  .arrow-down .head {
+    width: 0; height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 8px solid var(--text-dim);
+    opacity: 0.5;
+  }
+
+  .arrow-down .atag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 3px;
+  }
+
+  /* ===== LAYER LABEL (floating) ===== */
+  .layer-label {
+    position: absolute;
+    top: -13px;
+    left: 20px;
+    padding: 3px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    z-index: 2;
+  }
+
+  /* ===== INTERNET ===== */
+  .internet-row {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+
+  .internet-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface);
+    border: 2px solid #c8ccd8;
+    border-radius: 12px;
+    padding: 12px 28px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+
+  .internet-box .icon { font-size: 24px; }
+  .internet-box .label { font-weight: 700; font-size: 14px; color: var(--text); }
+  .internet-box .sub { color: var(--text-dim); font-size: 12px; }
+
+  /* ===== DIAGRAM CONTAINER ===== */
+  .diagram {
+    background: var(--surface);
+    border: 1px solid #d0d3de;
+    border-radius: 16px;
+    padding: 32px 24px 24px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+    margin-bottom: 40px;
+  }
+
+  .diagram-title {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 24px;
+    text-align: center;
+  }
+
+  /* ===== AWS CLOUD LAYER ===== */
+  .aws-cloud {
+    position: relative;
+    background: var(--aws-bg);
+    border: 2px solid var(--aws-border);
+    border-radius: 14px;
+    padding: 28px 18px 18px;
+  }
+
+  .aws-cloud > .layer-label {
+    background: var(--aws-orange);
+    color: #fff;
+  }
+
+  /* ===== VPC LAYER ===== */
+  .vpc-box {
+    position: relative;
+    background: var(--vpc-bg);
+    border: 2px solid var(--vpc-border);
+    border-radius: 12px;
+    padding: 28px 16px 16px;
+    margin-top: 4px;
+  }
+
+  .vpc-box > .layer-label {
+    background: var(--vpc-green);
+    color: #fff;
+  }
+
+  /* ===== ALB ===== */
+  .alb-row {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+
+  .alb-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--alb-bg);
+    border: 2px solid var(--alb-border);
+    border-radius: 10px;
+    padding: 10px 22px;
+  }
+
+  .alb-box .icon { font-size: 20px; }
+  .alb-box .label { font-weight: 700; font-size: 13px; color: var(--alb-purple); }
+  .alb-box .sub { color: var(--text-mid); font-size: 11px; font-family: 'JetBrains Mono', monospace; }
+
+  /* ===== EKS CLUSTER LAYER ===== */
+  .eks-cluster {
+    position: relative;
+    background: var(--eks-bg);
+    border: 2px solid var(--eks-border);
+    border-radius: 12px;
+    padding: 28px 14px 14px;
+    margin-bottom: 14px;
+  }
+
+  .eks-cluster > .layer-label {
+    background: var(--eks-blue);
+    color: #fff;
+  }
+
+  /* ===== SERVICE CARDS ===== */
+  .services-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 6px;
+  }
+
+  .service-card {
+    border-radius: 10px;
+    padding: 14px 14px 14px 18px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+  }
+
+  .service-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 5px;
+    height: 100%;
+  }
+
+  .service-card.user {
+    background: var(--svc-user-bg);
+    border: 2px solid var(--svc-user-border);
+  }
+  .service-card.user::before { background: var(--svc-user); }
+
+  .service-card.product {
+    background: var(--svc-product-bg);
+    border: 2px solid var(--svc-product-border);
+  }
+  .service-card.product::before { background: var(--svc-product); }
+
+  .service-name {
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .service-card.user .service-name { color: var(--svc-user); }
+  .service-card.product .service-name { color: var(--svc-product); }
+
+  .service-type {
+    font-size: 11px;
+    color: var(--text-mid);
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 10px;
+  }
+
+  .pods-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .pod {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+  }
+
+  .service-card.user .pod {
+    background: rgba(13, 114, 68, 0.1);
+    border: 1px solid rgba(13, 114, 68, 0.25);
+    color: var(--svc-user);
+  }
+
+  .service-card.product .pod {
+    background: rgba(180, 45, 106, 0.08);
+    border: 1px solid rgba(180, 45, 106, 0.22);
+    color: var(--svc-product);
+  }
+
+  .pod .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .k8s-svc {
+    font-size: 11px;
+    color: var(--text-mid);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .k8s-svc code {
+    font-family: 'JetBrains Mono', monospace;
+    background: rgba(0,0,0,0.06);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    color: var(--text);
+  }
+
+  /* Communication between services */
+  .services-wrapper { position: relative; }
+
+  .overlay-arrow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    z-index: 3;
+  }
+
+  .overlay-arrow .h-line {
+    width: 12px;
+    height: 2px;
+    background: var(--text-mid);
+    opacity: 0.4;
+  }
+
+  .overlay-arrow .tag {
+    font-size: 9px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    color: var(--text-mid);
+    background: var(--eks-bg);
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1.5px solid var(--eks-border);
+    white-space: nowrap;
+  }
+
+  /* Nodes */
+  .nodes-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .node-box {
+    flex: 1;
+    background: rgba(255,255,255,0.6);
+    border: 1.5px dashed var(--eks-border);
+    border-radius: 8px;
+    padding: 7px 10px;
+    text-align: center;
+  }
+
+  .node-box .label {
+    font-size: 11px;
+    color: var(--text-mid);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .node-box .type {
+    font-size: 10px;
+    color: var(--text-dim);
+  }
+
+  /* ===== ARROWS TO RDS ===== */
+  .bidi-arrows {
+    display: flex;
+    justify-content: center;
+    gap: 100px;
+    margin: 8px 0;
+  }
+
+  .bidi-arrows .arr {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .bidi-arrows .arr .shaft-b { width: 2px; height: 18px; background: var(--rds-indigo); opacity: 0.35; }
+  .bidi-arrows .arr .head-b {
+    width: 0; height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 7px solid var(--rds-indigo);
+    opacity: 0.5;
+  }
+
+  /* ===== RDS ===== */
+  .rds-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .rds-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--rds-bg);
+    border: 2px solid var(--rds-border);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+
+  .rds-card .icon { font-size: 22px; }
+
+  .rds-card .info .name {
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--rds-indigo);
+  }
+
+  .rds-card .info .detail {
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-mid);
+  }
+
+  /* ===== ECR ===== */
+  .ecr-row {
+    display: flex;
+    justify-content: center;
+    margin-top: 18px;
+  }
+
+  .ecr-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--ecr-bg);
+    border: 2px solid var(--ecr-border);
+    border-radius: 10px;
+    padding: 12px 20px;
+  }
+
+  .ecr-card .icon { font-size: 22px; }
+  .ecr-card .name { font-weight: 700; font-size: 13px; color: var(--ecr-teal); }
+  .ecr-card .detail { font-size: 10px; font-family: 'JetBrains Mono', monospace; color: var(--text-mid); }
+
+  /* ===== PROCEDURE ===== */
+  .procedure {
+    background: var(--surface);
+    border: 1px solid #d0d3de;
+    border-radius: 16px;
+    padding: 32px 28px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+  }
+
+  .procedure h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 24px;
+    color: var(--text);
+  }
+
+  .procedure h2 span { color: var(--aws-orange); }
+
+  .steps {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  .steps::before {
+    content: '';
+    position: absolute;
+    left: 23px;
+    top: 24px;
+    bottom: 24px;
+    width: 2px;
+    background: #d8dbe5;
+  }
+
+  .step {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    padding: 16px 0;
+  }
+
+  .step-num {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 16px;
+    position: relative;
+    z-index: 1;
+    color: #fff;
+  }
+
+  .step:nth-child(1) .step-num { background: var(--aws-orange); }
+  .step:nth-child(2) .step-num { background: var(--eks-blue); }
+  .step:nth-child(3) .step-num { background: var(--rds-indigo); }
+  .step:nth-child(4) .step-num { background: var(--ecr-teal); }
+  .step:nth-child(5) .step-num { background: var(--svc-user); }
+  .step:nth-child(6) .step-num { background: var(--alb-purple); }
+
+  .step-content h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .step:nth-child(1) .step-content h3 { color: var(--aws-orange); }
+  .step:nth-child(2) .step-content h3 { color: var(--eks-blue); }
+  .step:nth-child(3) .step-content h3 { color: var(--rds-indigo); }
+  .step:nth-child(4) .step-content h3 { color: var(--ecr-teal); }
+  .step:nth-child(5) .step-content h3 { color: var(--svc-user); }
+  .step:nth-child(6) .step-content h3 { color: var(--alb-purple); }
+
+  .step-content p {
+    color: var(--text-mid);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .step-content p strong { color: var(--text); }
+
+  .step-content p code {
+    font-family: 'JetBrains Mono', monospace;
+    background: rgba(0,0,0,0.06);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 12px;
+    color: var(--text);
+  }
+
+  .step-content .time {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 700px) {
+    .services-grid, .rds-row { grid-template-columns: 1fr; }
+    .bidi-arrows { gap: 30px; }
+    .page { padding: 20px 12px 40px; }
+    .header h1 { font-size: 22px; }
+    .overlay-arrow { display: none; }
+    .aws-cloud, .vpc-box, .eks-cluster { padding-left: 10px; padding-right: 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="badge">☁️ Amazon Web Services</div>
+    <h1>Arquitectura de Microservicios en <span>AWS EKS</span></h1>
+    <p>user-service &amp; product-service — Spring Boot + PostgreSQL sobre Kubernetes</p>
+  </div>
+
+  <!-- ===== ARCHITECTURE DIAGRAM ===== -->
+  <div class="diagram">
+    <div class="diagram-title">Diagrama de Arquitectura</div>
+
+    <!-- Internet -->
+    <div class="internet-row">
+      <div class="internet-box">
+        <div class="icon">🌐</div>
+        <div>
+          <div class="label">Internet / Cliente</div>
+          <div class="sub">curl, browser, Postman</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow-down">
+      <div class="shaft"></div>
+      <div class="head"></div>
+      <div class="atag">HTTP :80</div>
+    </div>
+
+    <!-- AWS Cloud -->
+    <div class="aws-cloud">
+      <div class="layer-label">☁️ AWS CLOUD (us-east-1)</div>
+
+      <!-- VPC -->
+      <div class="vpc-box">
+        <div class="layer-label">🔒 VPC</div>
+
+        <!-- ALB -->
+        <div class="alb-row">
+          <div class="alb-box">
+            <div class="icon">⚖️</div>
+            <div>
+              <div class="label">Application Load Balancer (ALB)</div>
+              <div class="sub">/api/users → user-svc &nbsp;|&nbsp; /api/products → product-svc</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="arrow-down">
+          <div class="shaft"></div>
+          <div class="head"></div>
+          <div class="atag">Ingress rules</div>
+        </div>
+
+        <!-- EKS Cluster -->
+        <div class="eks-cluster">
+          <div class="layer-label">⎈ EKS CLUSTER</div>
+
+          <div class="services-wrapper">
+            <div class="services-grid">
+              <!-- User Service -->
+              <div class="service-card user">
+                <div class="service-name">👤 user-service</div>
+                <div class="service-type">Spring Boot · port 8081</div>
+                <div class="pods-row">
+                  <div class="pod"><div class="dot"></div>Pod 1</div>
+                  <div class="pod"><div class="dot"></div>Pod 2</div>
+                </div>
+                <div class="k8s-svc">K8s Service: <code>user-service:8081</code></div>
+              </div>
+
+              <!-- Product Service -->
+              <div class="service-card product">
+                <div class="service-name">📦 product-service</div>
+                <div class="service-type">Spring Boot · port 8082</div>
+                <div class="pods-row">
+                  <div class="pod"><div class="dot"></div>Pod 1</div>
+                  <div class="pod"><div class="dot"></div>Pod 2</div>
+                </div>
+                <div class="k8s-svc">K8s Service: <code>product-service:8082</code></div>
+              </div>
+            </div>
+
+            <!-- Overlay communication arrow -->
+            <div class="overlay-arrow">
+              <div class="h-line"></div>
+              <div class="tag">REST ↔ HTTP</div>
+              <div class="h-line"></div>
+            </div>
+          </div>
+
+          <!-- Nodes -->
+          <div class="nodes-row">
+            <div class="node-box">
+              <div class="label">🖥 Worker Node 1</div>
+              <div class="type">t3.medium · us-east-1a</div>
+            </div>
+            <div class="node-box">
+              <div class="label">🖥 Worker Node 2</div>
+              <div class="type">t3.medium · us-east-1b</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Arrows to RDS -->
+        <div class="bidi-arrows">
+          <div class="arr">
+            <div class="shaft-b"></div>
+            <div class="head-b"></div>
+          </div>
+          <div class="arr">
+            <div class="shaft-b"></div>
+            <div class="head-b"></div>
+          </div>
+        </div>
+
+        <!-- RDS -->
+        <div class="rds-row">
+          <div class="rds-card">
+            <div class="icon">🐘</div>
+            <div class="info">
+              <div class="name">RDS — userdb</div>
+              <div class="detail">PostgreSQL 15 · db.t3.micro</div>
+              <div class="detail" style="opacity:0.6">userdb.xxx.rds.amazonaws.com</div>
+            </div>
+          </div>
+          <div class="rds-card">
+            <div class="icon">🐘</div>
+            <div class="info">
+              <div class="name">RDS — productdb</div>
+              <div class="detail">PostgreSQL 15 · db.t3.micro</div>
+              <div class="detail" style="opacity:0.6">productdb.xxx.rds.amazonaws.com</div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /vpc -->
+
+      <!-- ECR -->
+      <div class="ecr-row">
+        <div class="ecr-card">
+          <div class="icon">📦</div>
+          <div>
+            <div class="name">Amazon ECR — Container Registry</div>
+            <div class="detail">user-service:v1 &nbsp;|&nbsp; product-service:v1</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /aws-cloud -->
+  </div><!-- /diagram -->
+
+  <!-- ===== PROCEDURE ===== -->
+  <div class="procedure">
+    <h2>Procedimiento de Despliegue — <span>6 Pasos</span></h2>
+
+    <div class="steps">
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h3>Preparación del entorno</h3>
+          <p>Se crea una cuenta AWS y se instalan tres herramientas en tu máquina local: <strong>AWS CLI</strong> (para hablar con AWS), <strong>eksctl</strong> (para crear clusters EKS fácilmente) y <strong>kubectl</strong> (para controlar Kubernetes). Luego se configura un usuario IAM con permisos de administrador y se conectan las credenciales.</p>
+          <div class="time">⏱ ~10 min</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h3>Crear el Cluster EKS</h3>
+          <p>Con un archivo de configuración YAML y un solo comando (<code>eksctl create cluster</code>), se levanta el cluster Kubernetes en AWS. Esto crea automáticamente la VPC, las subnets en dos zonas de disponibilidad (us-east-1a y 1b), y 2 nodos Worker de tipo t3.medium donde correrán los microservicios.</p>
+          <div class="time">⏱ ~15-20 min</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h3>Crear las Bases de Datos RDS</h3>
+          <p>Se crean dos instancias de PostgreSQL en Amazon RDS: <strong>userdb</strong> y <strong>productdb</strong>, cada una para su microservicio. Se configuran dentro de la misma VPC del cluster con Security Groups que solo permiten tráfico desde los nodos EKS (puerto 5432). Luego se usa un pod "proxy" temporal dentro del cluster para conectarse y cargar los datos iniciales.</p>
+          <div class="time">⏱ ~10-15 min</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h3>Subir imágenes Docker a ECR</h3>
+          <p>Se crean repositorios en Amazon ECR (el Docker Hub de AWS). Luego se compila cada microservicio con Maven, se construye su imagen Docker, se etiqueta con la URI de ECR y se sube. Así las imágenes quedan disponibles para que EKS las descargue al momento de crear los pods.</p>
+          <div class="time">⏱ ~5-10 min</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <h3>Desplegar microservicios en EKS</h3>
+          <p>Se aplican los manifiestos de Kubernetes: <strong>ConfigMaps</strong> con las URLs de las bases de datos, <strong>Deployments</strong> que definen 2 réplicas de cada microservicio, y <strong>Services</strong> de tipo ClusterIP para la comunicación interna. Se instala también el <strong>AWS Load Balancer Controller</strong> mediante Helm, necesario para el siguiente paso.</p>
+          <div class="time">⏱ ~5 min</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">6</div>
+        <div class="step-content">
+          <h3>Exponer con Ingress (ALB)</h3>
+          <p>Se crea un recurso Ingress que automáticamente provisiona un <strong>Application Load Balancer</strong> en AWS. Este ALB enruta las peticiones: <code>/api/users</code> va al user-service y <code>/api/products</code> va al product-service. Una vez activo, se obtiene la URL pública y ya se puede acceder a los microservicios desde Internet.</p>
+          <div class="time">⏱ ~3-5 min</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

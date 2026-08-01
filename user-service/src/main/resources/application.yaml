@@ -1,0 +1,75 @@
+# ============================================
+# APPLICATION CONFIGURATION FOR KUBERNETES
+# ============================================
+# Este archivo se activa con: -Dspring.profiles.active=kubernetes
+# Las variables ${} se reemplazan con variables de entorno
+
+# ============================================
+# SERVER CONFIGURATION
+# ============================================
+server:
+  port: 8081
+
+spring:
+  application:
+    name: user-service
+
+  # ============================================
+  # DATASOURCE CONFIGURATION
+  # ============================================
+  # Estas variables vienen de ConfigMap y Secrets de Kubernetes
+  datasource:
+    url: jdbc:postgresql://localhost:5434/userdb
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
+    # ============================================
+    # CONNECTION POOL
+    # ============================================
+    hikari:
+      maximum-pool-size: ${POOL_SIZE:10}
+      minimum-idle: 5
+      connection-timeout: 20000
+
+  # ============================================
+  # JPA CONFIGURATION
+  # ============================================
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        jdbc:
+          lob:
+            non_contextual_creation: true
+    hibernate:
+      ddl-auto: ${DDL_AUTO:validate}
+    show-sql: ${SHOW_SQL:false}
+
+# ============================================
+# ACTUATOR (Para health checks de Kubernetes)
+# ============================================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: when-authorized
+  health:
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
+
+# ============================================
+# LOGGING
+# ============================================
+logging:
+  level:
+    com.tecsup.app.micro.user: ${LOG_LEVEL:INFO}
+    org.hibernate.SQL: ${SQL_LOG_LEVEL:WARN}

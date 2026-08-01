@@ -1,0 +1,100 @@
+# ============================================
+# DEPLOYMENT - Gestión de Pods
+# ============================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+  namespace: user-service
+  labels:
+    app: user-service
+
+spec:
+  # ========================================
+  # Número de réplicas (copias)
+  # ========================================
+  replicas: 1  # Empezamos con 1 pod
+
+  # ========================================
+  # Selector: ¿Qué pods gestionar?
+  # ========================================
+  selector:
+    matchLabels:
+      app: user-service
+
+  # ========================================
+  # Template: Cómo crear cada pod
+  # ========================================
+  template:
+    metadata:
+      labels:
+        app: user-service
+
+    spec:
+      containers:
+        - name: user-service
+
+          # Imagen Docker
+          image: user-service:1.0
+
+          # imagePullPolicy:
+          # - Never: Solo usar imagen local (desarrollo)
+          # - Always: Siempre descargar (producción)
+          imagePullPolicy: Never
+
+          # Puerto del contenedor
+          ports:
+            - containerPort: 8081
+              name: http
+
+          # ====================================
+          # VARIABLES DE ENTORNO
+          # ====================================
+          env:
+            # Spring profile
+            - name: SPRING_PROFILES_ACTIVE
+              value: "kubernetes"
+
+            # Desde ConfigMap
+            - name: DB_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: user-service-config
+                  key: DB_URL
+
+            - name: DDL_AUTO
+              valueFrom:
+                configMapKeyRef:
+                  name: user-service-config
+                  key: DDL_AUTO
+
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: user-service-config
+                  key: LOG_LEVEL
+
+            - name: JAVA_OPTS
+              valueFrom:
+                configMapKeyRef:
+                  name: user-service-config
+                  key: JAVA_OPTS
+
+            # Desde Secret
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: user-service-secret
+                  key: DB_USERNAME
+
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: user-service-secret
+                  key: DB_PASSWORD
+
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: user-service-secret
+                  key: JWT_SECRET

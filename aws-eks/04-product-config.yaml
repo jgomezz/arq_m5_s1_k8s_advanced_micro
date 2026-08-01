@@ -1,0 +1,26 @@
+---
+# ConfigMap para product-service
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: product-config
+  namespace: default
+data:
+  SPRING_PROFILES_ACTIVE: "prod"
+  SERVER_PORT: "8082"
+  # URL del user-service (nombre del Service en K8s)
+  USER_SERVICE_URL: "http://user-service:8081"
+
+---
+# Secret para product-service
+apiVersion: v1
+kind: Secret
+metadata:
+  name: product-secret
+  namespace: default
+type: Opaque
+stringData:
+  # ⚠️ REEMPLAZA con tu endpoint de RDS
+  DB_URL: "jdbc:postgresql://productdb.cvpunkj36v2t.us-east-1.rds.amazonaws.com:5432/productdb"
+  DB_USERNAME: "postgres"
+  DB_PASSWORD: "postgres"

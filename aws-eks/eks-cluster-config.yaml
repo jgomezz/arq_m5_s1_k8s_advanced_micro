@@ -1,0 +1,23 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: microservices-cluster
+  region: us-east-1
+
+nodeGroups:
+  - name: standard-workers
+    instanceType: t3.medium
+    desiredCapacity: 2
+    minSize: 1
+    maxSize: 3
+    volumeSize: 20
+    ssh:
+      allow: false
+    labels:
+      role: worker
+    tags:
+      Environment: learning
+      Project: spring-microservices
+
+availabilityZones: ["us-east-1a", "us-east-1b"]

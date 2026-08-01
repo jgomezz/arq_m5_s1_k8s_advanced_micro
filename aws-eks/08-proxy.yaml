@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: psql-proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: psql-proxy
+  template:
+    metadata:
+      labels:
+        app: psql-proxy
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15-alpine
+        command: ["sleep", "infinity"]

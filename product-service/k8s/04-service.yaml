@@ -1,0 +1,39 @@
+# ============================================
+# SERVICE - Exposición de red
+# ============================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: product-service
+  namespace: product-service
+  labels:
+    app: product-service
+
+spec:
+  # ========================================
+  # Tipo de Service
+  # ========================================
+  type: NodePort
+
+  # ========================================
+  # Selector: ¿A qué pods dirigir tráfico?
+  # ========================================
+  selector:
+    app: product-service
+
+  # ========================================
+  # Puertos
+  # ========================================
+  ports:
+    - name: http
+      protocol: TCP
+
+      # port: Puerto del SERVICE (interno)
+      port: 80
+
+      # targetPort: Puerto del CONTENEDOR
+      targetPort: 8082
+
+      # nodePort: Puerto en LOCALHOST
+      # Rango: 30000-32767
+      nodePort: 30082
