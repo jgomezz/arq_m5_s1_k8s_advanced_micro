@@ -73,3 +73,23 @@ logging:
 user:
   service:
      url: ${USER_SERVICE_URL:http://localhost:8081}
+
+
+# ============================================
+# RESILIENCE4J (Sesión 3)
+# ============================================
+resilience4j:
+  circuitbreaker:
+    instances:
+      userService:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10000    # 10 segundos en OPEN
+        permittedNumberOfCallsInHalfOpenState: 3
+  retry:
+    instances:
+      userService:
+        maxAttempts: 3
+        waitDuration: 1000                # 1 segundo entre reintentos
