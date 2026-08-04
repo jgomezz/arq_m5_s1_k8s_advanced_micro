@@ -307,3 +307,73 @@ curl -X POST http://localhost:9090/api/v1/admin/tsdb/snapshot
 ```
 
 - Revisar la carperta : observability/prometheus/data/snapshots
+
+## 10.- Configuración de Grafana en Docker Compose
+
+- Agregar al final del archivo docker-compose-observability.yml
+
+```yml
+
+  # ============================================
+  # GRAFANA - Dashboards y visualización
+  # ============================================
+  grafana:
+    image: grafana/grafana:10.4.0
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+volumes:
+  grafana-data:
+    driver: local
+
+```
+
+## 11.-  Auto-provisioning de Grafana
+
+- Archivo : observability/grafana/provisioning/datasources/datasources.yml
+
+```yml
+# ============================================
+# Grafana: Datasource automático (Prometheus)
+# ============================================
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: true
+```
+
+- Archivo : observability/grafana/provisioning/dashboards/dashboards.yml
+
+```yml
+# ============================================
+# Grafana: Provisioning de dashboards
+# ============================================
+apiVersion: 1
+
+providers:
+  - name: 'default'
+    orgId: 1
+    folder: 'Microservices'
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/json
+      foldersFromFilesStructure: false
+```
