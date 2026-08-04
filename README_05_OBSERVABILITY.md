@@ -62,7 +62,7 @@
 
 ## 3.- Modificar application.yaml y application-kubernetes.yaml en user-service y product-service
 
-- Agregar al final de los archivos 
+- Adaptar los parámetros de management y logging
 
 ```xml
 
@@ -138,6 +138,13 @@ Cambiar a:
 
 ## 5.- Probar métricas de Prometheus
 
+- Microservices user-services
+```bash
+curl http://localhost:8081/actuator/prometheus
+```
+
+- Microservices product-services
 ```bash
 curl http://localhost:8082/actuator/prometheus
 ```
+
