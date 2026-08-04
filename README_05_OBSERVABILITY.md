@@ -303,7 +303,7 @@ services:
 - Realizar operaciones con los microservicios user-services y product-service, luego forzar la generación de los archivos TSDB atraves de un snapshot
 
 ```
-curl -X POST http://localhost:9090/api/v1/admin/tsdb/snapsho
+curl -X POST http://localhost:9090/api/v1/admin/tsdb/snapshot
 ```
 
 - Revisar la carperta : observability/prometheus/data/snapshots
