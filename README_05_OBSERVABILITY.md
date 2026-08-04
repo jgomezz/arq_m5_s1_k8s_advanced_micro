@@ -260,3 +260,50 @@ jvm_memory_used_bytes{area="heap"} / jvm_memory_max_bytes{area="heap"} * 100
 sum(rate(http_server_requests_seconds_count{status=~"5.."}[5m])) by (application)
 
 ```   
+## 9.- Configuracion de persistencia de Prometheus
+
+- Realizar los siguiente cambios en el archivo docker-compose-observability.yml
+```yml
+
+# ============================================
+# Stack de observabilidad para desarrollo
+# Módulo 5 - Sesión 1
+#
+# Uso: docker compose -f docker-compose-observability.yml up -d
+# ============================================
+
+services:
+
+  # ============================================
+  # PROMETHEUS - Recolector de métricas
+  # ============================================
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./observability/prometheus/data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'                  # Retención: 30 días
+      - '--web.enable-admin-api'  # Habilita la API de administración para Prometheus      
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+```
+
+- Restaurar el servidor de Prometheus
+```
+ docker compose -f docker-compose-observability.yml up -d      
+```
+
+- Realizar operaciones con los microservicios user-services y product-service, luego forzar la generación de los archivos TSDB atraves de un snapshot
+
+```
+curl -X POST http://localhost:9090/api/v1/admin/tsdb/snapsho
+```
+
+- Revisar la carperta : observability/prometheus/data/snapshots
