@@ -234,6 +234,8 @@ docker compose -f docker-compose-observability.yml up -d
 docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 ```
 
+- Documentación Oficial : https://prometheus.io/docs/prometheus/latest/querying/basics/
+
 - Explorar Prometheus
 
 Abrir http://localhost:9090 y ejecutar estas queries en el menu de Graph:
