@@ -1,0 +1,24 @@
+name: observability_servers 
+
+# ============================================
+# Stack de observabilidad para desarrollo
+# Módulo 5 - Sesión 1
+#
+# Uso: docker compose -f docker-compose-observability.yml up -d
+# ============================================
+
+services:
+
+  # ============================================
+  # PROMETHEUS - Recolector de métricas
+  # ============================================
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped

@@ -1,0 +1,36 @@
+# ============================================
+# Prometheus Configuration
+# Módulo 5 - Sesión 1
+# ============================================
+
+global:
+  scrape_interval: 15s          # Cada 15 segundos consulta las métricas
+  evaluation_interval: 15s      # Cada 15 segundos evalúa reglas
+
+# ============================================
+# SCRAPE CONFIGS - Endpoints a monitorear
+# ============================================
+scrape_configs:
+
+  # Prometheus se monitorea a sí mismo
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # user-service (corriendo en el host, no en Docker)
+  - job_name: 'user-service'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['host.docker.internal:8081']
+        labels:
+          application: 'user-service'
+
+  # product-service (corriendo en el host, no en Docker)
+  - job_name: 'product-service'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['host.docker.internal:8082']
+        labels:
+          application: 'product-service'
