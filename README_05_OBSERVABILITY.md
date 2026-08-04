@@ -59,3 +59,26 @@
         </dependency>
 
 ```
+## 3.- SecurityConfig 
+
+- En user-service SecurityConfig.java 
+Se tiene :
+```
+java.requestMatchers("/actuator/health/**").permitAll()
+```
+Cambiar a:
+```
+java.requestMatchers("/actuator/**").permitAll()    // Permitir todos los actuator
+                                                 // En producción: restringir por IP
+```
+
+- En product-service SecurityConfig.java 
+Se tiene :
+```
+java.requestMatchers("/actuator/health/**").permitAll()
+```
+Cambiar a:
+```
+java.requestMatchers("/actuator/**").permitAll()    // Permitir todos los actuator
+                                                 // En producción: restringir por IP
+```
