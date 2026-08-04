@@ -64,7 +64,7 @@
 
 - Adaptar los parámetros de management y logging
 
-```xml
+```yml
 
 # ============================================
 # OBSERVABILIDAD - Módulo 5 Sesión 1
@@ -148,3 +148,113 @@ curl http://localhost:8081/actuator/prometheus
 curl http://localhost:8082/actuator/prometheus
 ```
 
+## 6.- Crear el  docker-compose con stack de observabilidad (docker-compose-observability.yml)
+```yml
+
+# ============================================
+# Stack de observabilidad para desarrollo
+# Módulo 5 - Sesión 1
+#
+# Uso: docker compose -f docker-compose-observability.yml up -d
+# ============================================
+
+services:
+
+  # ============================================
+  # PROMETHEUS - Recolector de métricas
+  # ============================================
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+```
+
+ ## 7.- Configuración de Prometheus
+
+- Archivo : observability/prometheus/prometheus.yml
+
+```yml
+# ============================================
+# Prometheus Configuration
+# Módulo 5 - Sesión 1
+# ============================================
+
+global:
+  scrape_interval: 15s          # Cada 15 segundos consulta las métricas
+  evaluation_interval: 15s      # Cada 15 segundos evalúa reglas
+
+# ============================================
+# SCRAPE CONFIGS - Endpoints a monitorear
+# ============================================
+scrape_configs:
+
+  # Prometheus se monitorea a sí mismo
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # user-service (corriendo en el host, no en Docker)
+  - job_name: 'user-service'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['host.docker.internal:8081']
+        labels:
+          application: 'user-service'
+
+  # product-service (corriendo en el host, no en Docker)
+  - job_name: 'product-service'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['host.docker.internal:8082']
+        labels:
+          application: 'product-service'
+
+```   
+## 8.- Verificar el servidor de Prometheus
+
+**NOTA** : Los microservicios user-service y product-service deben estar ejecutandose
+
+
+- Levantar stack de observabilidad
+
+```   
+docker compose -f docker-compose-observability.yml up -d
+```   
+
+- Verificar contenedores
+```
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+```
+
+- Explorar Prometheus
+
+Abrir http://localhost:9090 y ejecutar estas queries en el menu de Graph:
+
+```   
+# Query 1: Total de requests por servicio
+http_server_requests_seconds_count
+
+# Query 2: Tasa de requests por segundo
+rate(http_server_requests_seconds_count[1m])
+
+# Query 3: Latencia p95 de cada endpoint
+histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket[5m])) by (le, uri, application))
+
+# Query 4: Conexiones de base de datos activas
+hikaricp_connections_active
+
+# Query 5: Memoria JVM usada (%)
+jvm_memory_used_bytes{area="heap"} / jvm_memory_max_bytes{area="heap"} * 100
+
+# Query 6: Errores 5xx
+sum(rate(http_server_requests_seconds_count{status=~"5.."}[5m])) by (application)
+
+```   
