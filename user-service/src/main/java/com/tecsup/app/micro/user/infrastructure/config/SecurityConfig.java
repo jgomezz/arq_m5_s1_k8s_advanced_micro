@@ -61,7 +61,8 @@ public class SecurityConfig {
                         // Endpoints públicos
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/users/health").permitAll()
-                        .requestMatchers("/actuator/health/**").permitAll()
+//                        .requestMatchers("/actuator/health/**").permitAll()
+                        .requestMatchers("/actuator/**").permitAll()    // Permitir todos los actuator
 
                         // Solo ADMIN puede gestionar usuarios
                         .requestMatchers("/api/users/**").hasRole("ADMIN")
