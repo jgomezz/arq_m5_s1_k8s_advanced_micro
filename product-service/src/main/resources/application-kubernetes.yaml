@@ -73,3 +73,10 @@ logging:
 user:
   service:
      url: ${USER_SERVICE_URL:http://user-service.user-service.svc.cluster.local}
+
+# ============================================
+# JWT CONFIGURATION (Sesión 2)
+# ============================================
+jwt:
+  secret: ${JWT_SECRET:m1S3cr3tK3yJWT_T3csup2025!@#SecureToken}
+  expiration: 3600000  # 1 hora en milisegundos
