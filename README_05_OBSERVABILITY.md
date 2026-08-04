@@ -59,26 +59,85 @@
         </dependency>
 
 ```
-## 3.- SecurityConfig 
+
+## 3.- Modificar application.yaml y application-kubernetes.yaml en user-service y product-service
+
+- Agregar al final de los archivos 
+
+```xml
+
+# ============================================
+# OBSERVABILIDAD - Módulo 5 Sesión 1
+# ============================================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus    # ← Agregar prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: when-authorized
+  # Métricas Prometheus
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  # Trazas distribuidas
+  tracing:
+    sampling:
+      probability: 1.0        # 1.0 = 100% de trazas (solo para desarrollo)
+                                # En producción usar 0.1 (10%)
+  # Tags comunes en todas las métricas
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true    # Habilitar histograma de latencia
+
+# Zipkin endpoint
+management.zipkin.tracing:
+  endpoint: ${ZIPKIN_URL:http://localhost:9411/api/v2/spans}
+
+# Logging con traceId (se inyecta automáticamente)
+logging:
+  pattern:
+    level: "%5p [${spring.application.name},%X{traceId:-},%X{spanId:-}]"
+  level:
+    com.tecsup.app.micro.user: ${LOG_LEVEL:INFO}
+    org.hibernate.SQL: ${SQL_LOG_LEVEL:WARN}
+
+```
+
+
+## 4.- SecurityConfig 
 
 - En user-service SecurityConfig.java 
 Se tiene :
-```
-java.requestMatchers("/actuator/health/**").permitAll()
+```java
+.requestMatchers("/actuator/health/**").permitAll()
 ```
 Cambiar a:
-```
-java.requestMatchers("/actuator/**").permitAll()    // Permitir todos los actuator
+```java
+.requestMatchers("/actuator/**").permitAll()    // Permitir todos los actuator
                                                  // En producción: restringir por IP
 ```
 
 - En product-service SecurityConfig.java 
 Se tiene :
-```
-java.requestMatchers("/actuator/health/**").permitAll()
+```java
+.requestMatchers("/actuator/health/**").permitAll()
 ```
 Cambiar a:
-```
-java.requestMatchers("/actuator/**").permitAll()    // Permitir todos los actuator
+```java
+.requestMatchers("/actuator/**").permitAll()    // Permitir todos los actuator
                                                  // En producción: restringir por IP
+```
+
+## 5.- Probar métricas de Prometheus
+
+```bash
+curl http://localhost:8082/actuator/prometheus
 ```
