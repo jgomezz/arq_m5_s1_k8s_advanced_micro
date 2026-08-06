@@ -392,9 +392,16 @@ providers:
 
 ### Dashboard de Spring Boot
 
+- Importar Dashboard
 ```
 - En menu lateral izquierdo , ingresar a Dashboard -> New -> Import
 - Luego aparece una ventana para ingresar el ID del Dashboard. Ingresar 19004 y presionar en el boton "Load"
 - Aparece una nueva pantalla , Seleccionar datasource : Prometheus
 
+```
+
+- Generar peticiones a la base de datos
+
+```
+for i in $(seq 1 60); do curl -s http://localhost:8082/api/products > /dev/null; sleep 0.75; done
 ```
