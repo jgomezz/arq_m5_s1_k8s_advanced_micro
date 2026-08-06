@@ -417,4 +417,12 @@ Windows
 - Dashboard JVM --> ID 4701 (INFO : Heap Memory, Threads)
 - Dashboard HikariCP --> ID 6083 (INFO : Conexiones activas, Idle, Timeouts )
 
+### Dashboard personalizado
+
+- En el menu de Dashboard seleccionar : New -> New Dashboard 
+- Se muestra un pantalla, seleccionar Add Visualization
+- Seleccionar Datasource : Prometheus
+- Ingresar Query : rate(http_server_requests_seconds_count{application="product-service"}[1m])
+- Colocar como Titulo "Product Service - Requests/seg"
+- Grabar
 
