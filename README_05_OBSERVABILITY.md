@@ -411,3 +411,10 @@ Windows
 ```
 1..60 | ForEach-Object { Invoke-WebRequest -Uri "http://localhost:8082/api/products" -UseBasicParsing | Out-Null; Start-Sleep -Milliseconds 750 }
 ```
+
+### Otros Dashboard de Prometheus
+
+- Dashboard JVM --> ID 4701 (INFO : Heap Memory, Threads)
+- Dashboard HikariCP --> ID 6083 (INFO : Conexiones activas, Idle, Timeouts )
+
+
