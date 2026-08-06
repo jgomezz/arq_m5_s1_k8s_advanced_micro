@@ -402,6 +402,12 @@ providers:
 
 - Generar peticiones a la base de datos
 
+Linux/Mac
 ```
 for i in $(seq 1 60); do curl -s http://localhost:8082/api/products > /dev/null; sleep 0.75; done
+```
+
+Windows
+```
+1..60 | ForEach-Object { Invoke-WebRequest -Uri "http://localhost:8082/api/products" -UseBasicParsing | Out-Null; Start-Sleep -Milliseconds 750 }
 ```
