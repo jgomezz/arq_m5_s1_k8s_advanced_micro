@@ -450,3 +450,57 @@ Hacer un click en "New alert rule". y completar los campos indicandos abajo.
 ```
 for i in $(seq 1 300); do curl -s http://localhost:8082/api/products > /dev/null; sleep 0.05; done
 ```
+
+
+## 14.-  Configuracion de Zipkin 
+
+- Agregar en docker-compose-observability.yml lo siguiente, antes de los volumes:
+
+```
+  # ============================================
+  # ZIPKIN - Trazas distribuidas
+  # ============================================
+  zipkin:
+    image: openzipkin/zipkin:3.4
+    container_name: zipkin
+    ports:
+      - "9411:9411"
+    environment:
+      - STORAGE_TYPE=mem              # En memoria (desarrollo)
+    restart: unless-stopped
+
+volumes:
+  grafana-data:
+    driver: local
+```
+- Restaurar el servidor de Prometheus, Grafana y ZipKin
+```
+ docker compose -f docker-compose-observability.yml up -d      
+```
+
+## 15.-  Uso de ZipKin
+
+- Ingresar a http://localhost:9411 y ejecutar "Run Query" para ver las trazas distribuidas
+
+- Generar peticiones y realizar la  búsqueda por trace ID
+```
+TOKEN=$(curl -s -X POST http://localhost:8081/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"juan.perez@example.com","password":"admin123"}' \
+  | jq -r '.token')
+```
+
+``````
+curl -H "Authorization: Bearer $TOKEN"  http://localhost:8082/api/products/1
+
+```
+
+- Identificar la trace ID, en la figura mostrada se tiene el valor de 6a74065045770b8d7f9e2527cad331c5
+
+<img src="observability/images/zipkin_step_1.png " />
+
+- En la consola de ZipKin se busca el trace ID 6a74065045770b8d7f9e2527cad331c5 y se identifica los microservicios donde la peticiones ha viajado.
+
+<img src="observability/images/zipkin_step_2.png " />
+
+
