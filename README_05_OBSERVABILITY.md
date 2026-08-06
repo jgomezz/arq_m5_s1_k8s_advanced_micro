@@ -377,3 +377,8 @@ providers:
       path: /etc/grafana/provisioning/dashboards/json
       foldersFromFilesStructure: false
 ```
+
+- Restaurar el servidor de Prometheus y Grafana
+```
+ docker compose -f docker-compose-observability.yml up -d      
+```
