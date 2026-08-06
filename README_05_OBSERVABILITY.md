@@ -432,7 +432,7 @@ Windows
 
 <img src="observability/images/alert_rule_step_1.png " />
 
-Hacer un click en "New alert rule"
+Hacer un click en "New alert rule". y completar los campos indicandos abajo.
 
 <img src="observability/images/alert_rule_step_3.png " />
 
