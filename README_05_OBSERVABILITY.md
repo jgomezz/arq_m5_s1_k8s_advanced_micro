@@ -426,3 +426,27 @@ Windows
 - Colocar como Titulo "Product Service - Requests/seg"
 - Grabar
 
+## 13.-  Definiendo Alert Rules
+
+- Crear la alerta
+
+<img src="observability/images/alert_rule_step_1.png " />
+
+Hacer un click en "New alert rule"
+
+<img src="observability/images/alert_rule_step_3.png " />
+
+<img src="observability/images/alert_rule_step_4.png " />
+
+<img src="observability/images/alert_rule_step_5.png " />
+
+<img src="observability/images/alert_rule_step_6.png " />
+
+
+- Estados de las Alert Rules : NORMAL -> PENDING -> FIRING
+
+- Generamos la carga simulada
+
+```
+for i in $(seq 1 300); do curl -s http://localhost:8082/api/products > /dev/null; sleep 0.05; done
+```
