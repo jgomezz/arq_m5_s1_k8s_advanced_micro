@@ -1,0 +1,15 @@
+# ============================================
+# Grafana: Provisioning de dashboards
+# ============================================
+apiVersion: 1
+
+providers:
+  - name: 'default'
+    orgId: 1
+    folder: 'Microservices'
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/json
+      foldersFromFilesStructure: false

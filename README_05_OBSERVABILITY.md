@@ -382,3 +382,8 @@ providers:
 ```
  docker compose -f docker-compose-observability.yml up -d      
 ```
+
+- Ingresar a Grafana. ( credenciales admin/admin)
+```
+   Abrir http://localhost:3000
+```
