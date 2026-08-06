@@ -490,7 +490,7 @@ TOKEN=$(curl -s -X POST http://localhost:8081/api/auth/login \
   | jq -r '.token')
 ```
 
-``````
+```
 curl -H "Authorization: Bearer $TOKEN"  http://localhost:8082/api/products/1
 
 ```
